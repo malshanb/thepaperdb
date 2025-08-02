@@ -117,11 +117,20 @@
 
         .navbar {
           flex-direction: column;
-          align-items: flex-start;
+          align-items: center; /* center horizontally */
+          text-align: center; /* center text inside */
         }
 
         .navbar nav {
           margin-top: 10px;
+          display: flex;
+          flex-direction: column;
+          align-items: center; /* center nav links */
+          gap: 10px; /* space between links */
+        }
+
+        .navbar nav a {
+          margin-left: 0; /* remove left margin for vertical layout */
         }
       }
     </style>
@@ -179,7 +188,8 @@
     </main>
 
     <footer>
-      Sources are aggregated from external websites and user contributions. We respect all original content creators. For more info, see our
+      Sources are aggregated from external websites and user contributions. We
+      respect all original content creators. For more info, see our
       <a href="pages/disclaimer.html">Disclaimer</a>.
     </footer>
 
