@@ -1,0 +1,11 @@
+body {
+  font-family: monospace;
+  padding: 0;
+  margin: 20px;
+  background: #f9f9f9;
+}
+
+p {
+  font-size: 1rem;
+  margin-bottom: 1em; /* space between paragraphs */
+}

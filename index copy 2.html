@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>The Paper Database</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: monospace;
+        padding: 20px;
+        background: #f9f9f9;
+        margin: 0;
+      }
+
+      h2 {
+        margin-top: 0;
+      }
+
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      .filters input,
+      .filters select,
+      .filters button {
+        padding: 8px;
+        font-family: monospace;
+        font-size: 1em;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background: #fff;
+        flex: 1 1 150px;
+        min-width: 120px;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+
+      li {
+        margin-bottom: 8px;
+        background: #fff;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+
+      a {
+        text-decoration: none;
+        color: #0077cc;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      @media (max-width: 600px) {
+        .filters {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2>The Paper Database [TECH]</h2>
+
+    <div class="filters">
+      <input type="text" id="searchBox" placeholder="Search keywords..." />
+
+      <select id="gradeFilter">
+        <option value="">All Grades</option>
+        <option value="12">12</option>
+        <option value="13">13</option>
+      </select>
+
+      <select id="subjectFilter">
+        <option value="">All Subjects</option>
+        <option value="ET">ET</option>
+        <option value="ICT">ICT</option>
+        <option value="SFT">SFT</option>
+      </select>
+
+      <select id="termFilter">
+        <option value="">All Terms</option>
+        <option value="1st term">1st term</option>
+        <option value="2nd term">2nd term</option>
+        <option value="3rd term">3rd term</option>
+      </select>
+
+      <select id="yearFilter">
+        <option value="">All Years</option>
+        <option value="2017">2017</option>
+        <option value="2020">2020</option>
+        <option value="2021">2021</option>
+        <option value="2022">2022</option>
+        <option value="2023">2023</option>
+        <option value="2024">2024</option>
+      </select>
+
+      <select id="provinceFilter">
+        <option value="">All Provinces</option>
+        <!-- options will be populated dynamically -->
+      </select>
+
+      <button id="clearBtn">Clear Filters</button>
+    </div>
+
+    <ul id="paperList"></ul>
+
+    <script>
+      let papers = [];
+
+      const paperList = document.getElementById("paperList");
+      const searchBox = document.getElementById("searchBox");
+      const gradeFilter = document.getElementById("gradeFilter");
+      const subjectFilter = document.getElementById("subjectFilter");
+      const termFilter = document.getElementById("termFilter");
+      const yearFilter = document.getElementById("yearFilter");
+      const provinceFilter = document.getElementById("provinceFilter");
+      const clearBtn = document.getElementById("clearBtn");
+
+      async function fetchPapers() {
+        try {
+          const response = await fetch("papers.json");
+          papers = await response.json();
+          populateProvinceFilter();
+          renderPapers();
+        } catch (error) {
+          paperList.innerHTML = "<li>Error loading papers.json</li>";
+          console.error("Failed to load JSON:", error);
+        }
+      }
+
+      function populateProvinceFilter() {
+        const provinces = new Set();
+        papers.forEach(paper => {
+          if (paper.province) {
+            provinces.add(paper.province);
+          }
+        });
+
+        Array.from(provinces).sort().forEach(province => {
+          const option = document.createElement("option");
+          option.value = province;
+          option.textContent = province;
+          provinceFilter.appendChild(option);
+        });
+      }
+
+      function renderPapers() {
+        const searchQuery = searchBox.value.toLowerCase();
+        const gradeVal = gradeFilter.value;
+        const subjectVal = subjectFilter.value;
+        const termVal = termFilter.value;
+        const yearVal = yearFilter.value;
+        const provinceVal = provinceFilter.value;
+
+        paperList.innerHTML = "";
+
+        papers.forEach((paper) => {
+          const { title, url, province } = paper;
+          const lowerTitle = title.toLowerCase();
+
+          const matchSearch =
+            searchQuery === "" || lowerTitle.includes(searchQuery);
+          const matchGrade =
+            gradeVal === "" || title.includes(`Grade ${gradeVal}`);
+          const matchSubject = subjectVal === "" || title.includes(subjectVal);
+          const matchTerm = termVal === "" || title.includes(termVal);
+          const matchYear = yearVal === "" || title.includes(yearVal);
+          const matchProvince =
+            provinceVal === "" || province === provinceVal;
+
+          if (
+            matchSearch &&
+            matchGrade &&
+            matchSubject &&
+            matchTerm &&
+            matchYear &&
+            matchProvince
+          ) {
+            const li = document.createElement("li");
+            const link = document.createElement("a");
+            link.href = url;
+            link.textContent = title;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            li.appendChild(link);
+            paperList.appendChild(li);
+          }
+        });
+      }
+
+      function clearFilters() {
+        searchBox.value = "";
+        gradeFilter.value = "";
+        subjectFilter.value = "";
+        termFilter.value = "";
+        yearFilter.value = "";
+        provinceFilter.value = "";
+        renderPapers();
+      }
+
+      [
+        searchBox,
+        gradeFilter,
+        subjectFilter,
+        termFilter,
+        yearFilter,
+        provinceFilter,
+      ].forEach((el) => el.addEventListener("input", renderPapers));
+
+      clearBtn.addEventListener("click", clearFilters);
+
+      fetchPapers();
+    </script>
+  </body>
+</html>
